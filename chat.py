@@ -17,7 +17,7 @@ import urllib.request
 
 # --- Editable knobs ---------------------------------------------------------
 
-MAX_TOKENS = 20  # observation knob: set low to watch the answer get cut off.
+MAX_TOKENS = 300  # observation knob: set low to watch the answer get cut off.
 SYSTEM_MESSAGE = "You are a helpful assistant. Answer concisely."
 
 
