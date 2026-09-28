@@ -1,45 +1,44 @@
-# Artifact-chain template
+# Week 2 chat client
 
-Starting point for major project submissions in CPSC 415 (AI Integration, Trinity College). Click **Use this template** on GitHub to create your own repository from it. Do not fork.
+A command-line program that sends one question to a model through OpenRouter, prints the answer, then prints a final line with the model name and the input and output token counts.
 
-The course follows Anthropic's [AI-Native SDLC Playbook](https://claude.com/blog/the-ai-native-sdlc-playbook): every stage of the work leaves a short, version-controlled artifact. The agent writes most of the code. You decide what gets built, steer, verify, and explain every choice. These files are how you prove you understood what the agent built.
+## Running it
 
-## Early labs
+    export OPENROUTER_API_KEY="your-key"
+    export CHAT_BASE_URL=https://openrouter.ai/api/v1
+    export CHAT_MODEL="minimax/minimax-m3"
+    python3 chat.py "In one sentence, what is a context window?"
 
-Week 1 uses the minimal repository described in the course handout. Later introductory labs complete only the stages assigned so far. This template describes the full chain for team projects and the final portfolio; it does not require unintroduced artifacts in Week 1. Project languages are chosen and justified, with one separate guided exercise in an unfamiliar language.
+Python 3, standard library only. No CLI flags, no defaults in the source. All three variables must be set or the program names the missing ones and exits non-zero.
 
-## The chain
+## What I corrected in the intent draft
 
-| Stage | File | Written by | Approved by |
-|---|---|---|---|
-| Plan | `intent/<name>.md` | The agent, after interviewing you | You |
-| Design | `spec.md` | The agent, from the approved intent | You, against the intent |
-| Build | `plan.md`, then code on a branch | The agent | You, before any code |
-| Test | tests, lint, CI | The agent | You confirm the loop actually ran |
-| Deploy | a pull request reviewed against `REVIEW.md` | A separate reviewing agent | You merge |
-| Maintain | a new `intent/<name>.md` | Triggered by a bug, a ticket, or a model change | You triage |
+**The filename.** The draft said `chat-client.py`. The lab runs `python3 chat.py`, so building to the draft would have produced a program the handout's own command could not find.
 
-`CLAUDE.md` and `REVIEW.md` travel with the repo and are graded artifacts.
+**The missing system message.** The draft described sending only the question. Step 3 requires identifying two roles in the `messages` array and changing the system message, so I added a constraint saying the request carries both a system message and a user message, with the system text in the source rather than an environment variable.
 
-## Rules that are graded
+## One line I can explain
 
-- Intent and spec exist before code. Plan is approved before implementation. The commit history shows it.
-- One pull request per feature, from a branch, reviewed before merge. Do not commit to `main` directly after the first commit.
-- `spec.md` states the **language** and the **model** for each component and why.
-- `ANNOTATION.md` answers the four questions for the finished project.
-- No secrets in the repo. `.claude/settings.local.json` and `.env` are ignored; the `.example` file shows the shape.
+`chat.py` line 20: `MAX_TOKENS = 300`
 
-## Submitting
+A named constant holding the ceiling on output tokens, passed into the request body on line 64. I changed it three times during the checks and the behavior changed each time.
 
-Tag the commit you are submitting and put the repository URL plus the tag on Moodle:
+## The two models
 
-```
-git tag tp1-submitted
-git push origin tp1-submitted
-```
+MiniMax M3 and GPT-4o-mini, same question, same system message, no code change between runs. Only `CHAT_MODEL` changed.
 
-Tags the course uses: `intent-spec`, `tp1-submitted`, `tp2-submitted`, `portfolio-final`.
+Both answered correctly in one sentence. MiniMax M3 cost $0.0000448; GPT-4o-mini cost $0.0000198.
 
-## Running the agent
+The token counts were not comparable: the identical request tokenized to 177 input tokens on MiniMax M3 and 32 on GPT-4o-mini. This is one question on one run, not a benchmark.
 
-Copy `.claude/settings.local.json.example` to `.claude/settings.local.json` and fill in your OpenRouter key and model slugs, or use the `orclaude` launcher from the [course repository](https://github.com/kousen/ai-integration-course/tree/main/scripts).
+## Things I noticed
+
+With the system message set to "Answer only in rhyming couplets" and `max_tokens` at 300, the program printed `None` and the usage line reported 300 output tokens. MiniMax M3 spent its whole output budget on hidden reasoning without emitting visible text. Raising the limit to 2000 produced the couplets in 261 tokens, against 28 for the same question under a plain system prompt.
+
+Printing the bare word `None` is a rough edge. The program prints whatever is in the content field, and the field was null. A clearer message would say the response was empty.
+
+`urllib` failed with a certificate verification error until I ran Python's `Install Certificates.command`. That installs a certificate bundle into the Python environment; it is not a package the program imports, and `chat.py` remains standard library only.
+
+## Local model
+
+Not attempted.
