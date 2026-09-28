@@ -1,5 +1,7 @@
 # Project conventions
-
+- This is the Week 2 introductory lab. Only the intent stage is assigned:
+  no spec.md, no plan.md, no branches or pull requests. Commit to main.
+- Standard library only. No packages, no pip install, no Maven or Gradle.
 <!-- The agent reads this at the start of every session. Keep it short and current.
      Graded: does it reflect how the team actually works? -->
 
